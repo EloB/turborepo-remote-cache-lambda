@@ -67,23 +67,26 @@ const generatePresignedUrl = async (
     return formatUrl(signedUrlObject);
 };
 
-export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const lambdaHandler = async (event: any): Promise<APIGatewayProxyResult> => {
     const {
-        path,
-        httpMethod,
+        rawPath,
+        rawQueryString,
+        requestContext: {
+            http: { method: httpMethod },
+        },
         headers: {
-            Authorization = '',
-            'Access-Control-Request-Method': requestMethod,
-            'X-Forwarded-Proto': protocol,
-            Host: host,
+            authorization = '',
+            'access-control-request-method': requestMethod,
+            'x-forwarded-proto': protocol,
+            host: host,
         },
     } = event;
 
-    const location = new URL(`${protocol}://${host}${path}`);
+    const location = new URL(`${protocol}://${host}${rawPath}${rawQueryString ? `?${rawQueryString}` : ''}`);
 
     if (!location.pathname.startsWith('/v8/artifacts')) return notFound();
 
-    switch (`${httpMethod}:${path}`) {
+    switch (`${httpMethod}:${location.pathname}`) {
         case 'GET:/v8/artifacts/status':
             return {
                 statusCode: 200,
@@ -98,7 +101,7 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
             try {
                 const [, , , hash] = location.pathname.split('/');
                 if (!hash || httpMethod !== 'OPTIONS') return notFound();
-                const { teamId } = authenticate(Authorization);
+                const { teamId } = authenticate(authorization);
                 const Key = `${teamId}/${hash}`;
                 if (requestMethod === 'GET' || requestMethod === 'PUT') {
                     return {
