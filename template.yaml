@@ -5,6 +5,14 @@ Description: >
 
   Sample SAM Template for turborepo-remote-cache-lambda
 
+Parameters:
+  JWTSecret:
+    Type: String
+    Description: JWT secret for authenticating requests
+  S3Bucket:
+    Type: String
+    Description: S3 bucket for storing the remote cache
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
@@ -14,39 +22,49 @@ Globals:
     LoggingConfig:
       LogFormat: JSON
 Resources:
-  HelloWorldFunction:
+  TurboRepoRemoteCacheFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello-world/
+      CodeUri: function/
       Handler: app.lambdaHandler
       Runtime: nodejs20.x
       Architectures:
-      - x86_64
+        - arm64
+      Environment:
+        Variables:
+          JWT_SECRET: !Ref JWTSecret
+          S3_BUCKET: !Ref S3Bucket
       Events:
-        HelloWorld:
+        TurboRepoRemoteCache:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
-            Path: /hello
-            Method: get
+            Path: /{paths+}
+            Method: any
+        TurboRepoRemoteCacheRoot:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /
+            Method: any
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
         Target: es2020
         Sourcemap: true
+        External: ['@aws-sdk/*']
         EntryPoints:
-        - app.ts
+          - app.ts
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+  TurboRepoRemoteCacheApi:
+    Description: API Gateway endpoint URL for Prod stage for Turbo Repo Remote Cache function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  TurboRepoRemoteCacheFunction:
+    Description: Turbo Repo Remote Cache Lambda Function ARN
+    Value: !GetAtt TurboRepoRemoteCacheFunction.Arn
+  TurboRepoRemoteCacheFunctionIamRole:
+    Description: Implicit IAM Role created for Turbo Repo Remote Cache function
+    Value: !GetAtt TurboRepoRemoteCacheFunctionRole.Arn
