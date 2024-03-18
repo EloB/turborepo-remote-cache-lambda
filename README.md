@@ -29,3 +29,6 @@ Simpliest way is going to https://jwt.io/ and create one. Enter you `JWT_SECRET`
 
 ### Executing turbo tasks
 Don't forget to set the environment `TURBO_TOKEN` when running a turbo task. Important also that you apply the `--preflight` to the commands when executing for instance `turbo build --preflight` else it won't work. There should be an dedicated environment variable for that but hasn't able to work (see `TURBO_PREFLIGHT` at https://turbo.build/repo/docs/reference/system-variables#system-environment-variables).
+
+## Todo
+- Simplify the deployment using `sam deploy` and parameter overrides. Accepting PRs for this!
