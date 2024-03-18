@@ -1,5 +1,5 @@
 # Self hosted Turborepo Remote Cache Lambda
-Using Lambda and S3. This is using presigned URLs which solves the 6mb limit problem for lambda function payloads.
+Using Lambda and S3. This is using presigned URLs which solves the 6mb limit problem for lambda function payloads. This is using Turborepo preflight.
 
 ## Installation:
 First create an private S3 Bucket then add some "Lifecycle rules" to delete old files after awhile to save storage.
